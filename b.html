@@ -1,0 +1,70 @@
+<html>
+<head>
+	<!-- 存储服务 -->
+	<script src="js/av-min.js"></script>
+	<!-- 实时消息服务 -->
+	<script src="js/realtime.browser.min.js"></script>
+	<script>
+		// 存储服务
+		var { Query, User } = AV;
+		// 实时消息服务
+		var { Event, Realtime, TextMessage } = AV;
+		var APP_ID = 'OHwiQiS5Pj5G0QUCQ9Ju304k-9Nh9j0Va';
+		var APP_KEY = 'PuAmE8KaYi7lE5CBv5iyA4AM';
+		AV.init('APP_ID', 'APP_KEY');
+		var realtime = new Realtime({
+		  appId: APP_ID,
+		  appKey: APP_KEY,
+		  region: 'cn', // 美国节点为 "us"
+		});
+	</script>
+	<script>
+		realtime.createIMClient('B').then(function(b) {
+		  b.on(Event.MESSAGE, function(message, conversation) {
+		    console.log('[B] received a message from [' + message.from + ']: ' + message.text);
+		   	if(message.from == 'Z' && message.text == 'ok' ){
+		    	show_Time()
+		    }else if(message.from == 'Z' && message.text !== 'ok' ){
+		    	console.log(message.text);
+				var btn = document.getElementById("btn_b");
+		    	btn.disabled=true;
+		    	btn.innerHTML = message.text + " 作答"; 
+		    }
+		  });
+		}).catch(console.error);
+	</script>
+	<script>
+		function send_B(){
+			document.getElementById("btn_b").disabled=true; 
+			realtime.createIMClient('B').then(function(b) {
+			  return b.createConversation({
+			    members: ['A','Z'],
+			    unique: true
+			  })
+			}).then(function(conversation) {
+			  return conversation.send(new TextMessage('B'));
+			}).then(function(message) {
+			  console.log('B 抢答成功！');
+			}).catch(console.error);		
+		}
+		function show_Time(){
+		    var time = 3;
+		    var btn = document.getElementById("btn_b");
+		    var set = setInterval(function() {
+		        btn.innerHTML = time;
+		        if(time === 0) {
+		            btn.innerHTML = "B 开始抢答";
+		            btn.disabled = false;
+		            clearInterval(set);
+		        }
+		        time--;
+		    }, 1000);
+		}
+	</script>
+</head>
+<body>
+
+<button id="btn_b" onclick="send_B()" disabled="true" value="3">B 准备抢答</button>
+
+</body>
+</html>

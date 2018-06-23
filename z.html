@@ -1,0 +1,56 @@
+<html>
+<head>
+	<!-- 存储服务 -->
+	<script src="js/av-min.js"></script>
+	<!-- 实时消息服务 -->
+	<script src="js/realtime.browser.min.js"></script>
+	<script>
+		// 存储服务
+		var { Query, User } = AV;
+		// 实时消息服务
+		var { Event, Realtime, TextMessage } = AV;
+		var APP_ID = 'OHwiQiS5Pj5G0QUCQ9Ju304k-9Nh9j0Va';
+		var APP_KEY = 'PuAmE8KaYi7lE5CBv5iyA4AM';
+		AV.init('APP_ID', 'APP_KEY');
+		var realtime = new Realtime({
+		  appId: APP_ID,
+		  appKey: APP_KEY,
+		  region: 'cn', // 美国节点为 "us"
+		});
+	</script>
+	<script>
+		realtime.createIMClient('Z').then(function(z) {
+		  z.on(Event.MESSAGE, function(message, conversation) {
+		    console.log('[Z] received a message from [' + message.from + ']: ' + message.text);
+		    conversation.send(new TextMessage(message.text));
+		  });
+		  return z.createConversation({
+			    members: ['A', 'B'],
+			    unique: true
+		  })
+		}).then(Event.MESSAGE,function(message,conversation) {
+			return conversation.send(new TextMessage(message.text));
+		}).catch(console.error);
+	</script>
+	<script>
+		function send_Me(){
+			realtime.createIMClient('Z').then(function(z) {
+			  return z.createConversation({
+			    members: ['A', 'B'],
+			    unique: true
+			  })
+			}).then(function(conversation) {
+			  return conversation.send(new TextMessage('ok'));
+			}).then(function(message) {
+			  console.log('发送成功！');
+			}).catch(console.error);		
+		}
+	</script>
+
+</head>
+<body>
+
+<button onclick="send_Me()">发送消息</button>
+
+</body>
+</html>
